@@ -8,7 +8,7 @@
 
 ## Установка софта
 
-1. Установить из F-droid или напрямую APK программу termux. Версия из PlayStore не годится.
+1. Установить из F-droid или [напрямую APK](https://github.com/termux/termux-app/releases) программу termux. Версия из PlayStore не годится.
 2. Зайти в termux, установить необходимые пакеты:
 
 
@@ -23,6 +23,7 @@ pkg install git cmake imagemagick sox
 > git clone https://github.com/drowe67/codec2.git
 > mkdir codec2/build; cd codec2/build
 > cmake ..
+> make
 ```
 
 
