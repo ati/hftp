@@ -1,20 +1,21 @@
 #!/bin/bash
 
 OUT_DIR=./out
+OUT_FORMAT=wav # or mp3
 MAX_FILE_SIZE=10240 # bytes
 MAX_IMG_FILE=256x256 # pixels
 freedv_data_raw_tx=~/distr/codec2/build/src/freedv_data_raw_tx
 
 in_file="$1"
-out_file="$OUT_DIR/5_out.mp3"
+out_file="$OUT_DIR/5_out.$OUT_FORMAT"
 
 if [[ ! -f "$in_file" ]]; then
     # no input file specified, try to play existing out files
     # sorted by file name
     # check that those files do actualy exist
-    compgen -G "$OUT_DIR/*.mp3"
+    compgen -G "$OUT_DIR/*.$OUT_FORMAT"
     if [[ $? == 0 ]]; then
-        ls $OUT_DIR/*.mp3 | xargs play
+        ls $OUT_DIR/*.$OUT_FORMAT | xargs play
     else
         echo "No sound found in '$OUT_DIR', exitting"
         exit 1
