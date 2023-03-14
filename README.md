@@ -1,52 +1,88 @@
-# Скрипт для передачи (небольших) файлов по коротковолновой связи
+# Script to send one-way messages using HF radio transmission.
 
-Передача идёт примерно со скоростью 35 БАЙТ в секунду.
-Для передачи достаточно смартфона с установленным ПО (инструкции ниже).
+General idea is:
 
-Канальное кодирование выполняется утилитой freedv_data_raw_tx из проекта [codec2](https://github.com/drowe67/codec2)
+0. resize big jpeg file, convert it to BPG format
+1. convert a small jpeg into OFDM raw data using utility from the [codec2 project](https://github.com/drowe67/codec2/blob/master/README_data.md)
+2. convert raw data into audio file (sox)
+3. transmit it using REM/DATA link of the tranceiver (tested with TX-500) in VOX mode
+4. record transmission using KiwiSDR network
+5. send decoded message via email to recepients
 
 
-## Установка софта
+1-3 are running in the smartphone (Pixel3, Android11, termux with compiled codec2 and installed sox and ImageMagick)
+4-5 are running on the internet-connected server
 
-1. Установить из F-droid или [напрямую APK](https://github.com/termux/termux-app/releases) программу termux. Версия из PlayStore не годится.
-2. Зайти в termux, установить необходимые пакеты:
 
+## Software setup/install
+
+1. Install Termux from F-droid or [APK](https://github.com/termux/termux-app/releases). PlayStore version does not work
+2. Open Termux and run:
 
 ```
 pkg install git cmake imagemagick sox
 ```
 
-3. Клонировать и собрать codec2:
+3. Install codec2 utils
 
 ```
 > mkdir distr; cd distr
-> git clone https://github.com/drowe67/codec2.git
+> git clone --depth=1 https://github.com/drowe67/codec2.git
 > mkdir codec2/build; cd codec2/build
 > cmake ..
-> make
+> make && make install
+```
+
+4. (Optional) Install bpgenc
+
+Bpgenc is a highly efficient (2 times smaller that JPEG) image copmpression format
+
+4.1 Install required libraries
+
+```
+> mkdir ~/local
+> pkg install libjpeg-turbo
+```
+
+4.2 Compile and install SDL and SDL_Images v 1.2
+
+```
+> git clone --depth=1 https://github.com/libsdl-org/SDL-1.2.git
+> git clone --branch=SDL-1.2 --depth=1 https://github.com/libsdl-org/SDL_image.git
+> cd ~/distr/SDL-1.2; ./configure --prefix=$HOME/local; make && make install
+> cd ~/distr/SDL_image; ./configure --prefix=$HOME/local; make && make install
+```
+
+4.2 Patch and install libbpg
+
+```
+TODO
 ```
 
 
-## Запуск скрипта
-
-Если скрипт запускается с параметром, то этот параметр рассматривается как путь к файлу, который надо преобразовать в аудифайл для передачи.
-Если этот файл имеет расширение .jpg, то эта картинка предварительно сжимается до размера 256х256 пикселов.
-
-Если скрипт запускается без параметров, то он воспроизводит аудиофайл, созданный при запуске с параметром. Например:
+## Running script
 
 ```
-> ./send.sh ~/DSC_2132.JPG # масштабирует картинку и создаёт файл out/5_out.mp3
-> ./send.sh # воспроизводит файл 5_out.mp3
+./send.sh [path_to_image]
 ```
 
-## Ссылки
+Running script with a single parameter converts it to the audiofile for the OFDM transmission
 
-Я использую трансивер TX-500, поэтому ссылки относятся к его подготовке к работе в DIGITAL режиме 
+If script is run without parameters it plays the audiofile to the phone's default audio output
 
-1. [Настройка параметров](https://downloads.lab599.com/TX500/Lab599-TX500-DIG-mode-setup-EN.pdf) digital режима трансивера
-2. [распайка кабеля REM/DATA](https://downloads.lab599.com/TX500/Lab599-TX500-adapters-wiring-diagram.pdf)
-2. [Передача данных в codec2](https://github.com/drowe67/codec2/blob/master/README_data.md)
+e.g.
+
+
+```
+> ./send.sh ~/DSC_2132.JPG # scales JPG and creates out/5_out.mp3
+> ./send.sh # plays 5_out.mp3
+```
+
+
+## Links
+
+1. [Setting](https://downloads.lab599.com/TX500/Lab599-TX500-DIG-mode-setup-EN.pdf) TX-500 digital mode
+2. [REM/DATA cable pinout](https://downloads.lab599.com/TX500/Lab599-TX500-adapters-wiring-diagram.pdf)
+2. [codec2 data transmission](https://github.com/drowe67/codec2/blob/master/README_data.md)
 2. [KiwiSDR client](https://github.com/jks-prv/kiwiclient)
-2. [SSTV handbook](https://www.sstv-handbook.com/)
-2. [Частотный план КВ-диапазона](https://srr.ru/tablitsa-chastotnogo-raspisaniya/)
 
