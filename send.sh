@@ -26,7 +26,15 @@ else
     if [[ "$in_file" =~ .(jpg|jpeg|JPG|JPEG) ]]; then
         # resize image with ImageMagick
         resized_img=$OUT_DIR/`basename "$in_file"`
-        convert -resize $MAX_IMG_FILE -strip -interlace Plane -gaussian-blur 0.05 -quality 75 "$in_file" "$resized_img"
+        # https://bellard.org/bpg/
+        if coommand -v bpgenc > /dev/null; then
+convert -resize $MAX_IMG_FILE -strip -quality 95 "$in_file" "$resized_img"
+            if bpgenc -m 9 -q 30 "$resized_img" -o "${resized_img}.bpg"; then
+                resized_img="${resized_img}.bpg"
+            fi
+        else
+            convert -resize $MAX_IMG_FILE -strip -interlace Plane -gaussian-blur 0.05 -quality 75 "$in_file" "$resized_img"
+        fi
         if [[ $? != 0 ]]; then
             echo "Error converting '$in_file', aborting"
             exit 4
